@@ -100,6 +100,7 @@ def enviarNotifi(texto, telefono, nombreC, nombreR):
         connection.request("POST","/v19.0/346378921896150/messages", data, headers)
         response = connection.getresponse()
         print(response.status, response.reason)
+        return redirect('/')
     except Exception as e:
         print(json.dumps(e))
     finally:
