@@ -20,9 +20,10 @@ def registrarUsuarios(request):
     nombreC = request.POST['txNombreC']
     nombreR = request.POST['txtNombreR']
     tiempoH = request.POST['numHoras']
+    mensaje =request.POST['txmensaje']
     #horaRegistro =['campo11']
     usuario = Usuario.objects.create(
-        telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH )
+        telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH,mensaje=mensaje )
     messages.success(request, 'Niñ@ registrado!')
     return redirect('/')
 
@@ -72,10 +73,10 @@ def verificar_token(req):
         return challenge
     else:
         return jsonify({'error':'Token Invalido'}),401
-def enviarNotifi(request,telefono, nombreC, nombreR):
+def enviarNotifi(request,telefono, nombreC, mensaje):
     #texto = texto.lower()
     
-    mensaje= 'Estimado '+nombreR+' esta a 5 minutos que se le termine el tiempo de '+nombreC
+    #mensaje= 'Estimado '+nombreR+' esta a 5 minutos que se le termine el tiempo de '+nombreC
     
     data={
             "messaging_product": "whatsapp",
@@ -84,7 +85,7 @@ def enviarNotifi(request,telefono, nombreC, nombreR):
             "type": "text",
             "text": {
                 "preview_url": False,
-                "body": "🚀 Hola,"+mensaje
+                "body": mensaje
             }
     }
   #Convertir el diccionaria a formato JSON

@@ -7,5 +7,5 @@ urlpatterns = [
     path('edicionUsuario/<telefono>', views.edicionUsuario),
     path('editarUsuario/', views.editarUsuario),
     path('eliminarUsuarios/<telefono>', views.eliminarUsuarios),
-    path('enviarNotifi/<telefono>/<nombreC>/<nombreR>', views.enviarNotifi),
+    path('enviarNotifi/<telefono>/<nombreC>/<mensaje>', views.enviarNotifi),
 ]
