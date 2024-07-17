@@ -5,12 +5,13 @@ import http.client
 import request2
 import json
 import jsonify
+from datetime import datetime
 # Create your views here.
 
 
 def home(request):
     usuariosListados = Usuario.objects.all()
-    messages.success(request, 'Usuarios listados!')
+    #messages.success(request, 'Usuarios listados!')
     return render(request, "gestionUsuarios.html", {"usuarios": usuariosListados})
 
 
@@ -19,9 +20,10 @@ def registrarUsuarios(request):
     nombreC = request.POST['txNombreC']
     nombreR = request.POST['txtNombreR']
     tiempoH = request.POST['numHoras']
+    #horaRegistro =['campo11']
     usuario = Usuario.objects.create(
-        telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH)
-    messages.success(request, '¡Curso registrado!')
+        telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH )
+    messages.success(request, 'Niñ@ registrado!')
     return redirect('/')
 
 def edicionUsuario(request, telefono):
@@ -54,7 +56,6 @@ def eliminarUsuarios(request, telefono):
 #Token de verificacion para la configuracion
 TOKEN_ANDERCODE = "ANDERCODE"
 
-#@app.route('/webhook', methods=['GET','POST'])
 def webhook():
     if request2.method == 'GET':
         challenge = verificar_token(request2)
@@ -71,7 +72,7 @@ def verificar_token(req):
         return challenge
     else:
         return jsonify({'error':'Token Invalido'}),401
-def enviarNotifi(texto, telefono, nombreC, nombreR):
+def enviarNotifi(request,telefono, nombreC, nombreR):
     #texto = texto.lower()
     
     mensaje= 'Estimado '+nombreR+' esta a 5 minutos que se le termine el tiempo de '+nombreC
@@ -79,11 +80,11 @@ def enviarNotifi(texto, telefono, nombreC, nombreR):
     data={
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
-            "to": '593979418199',
+            "to": '593'+telefono,
             "type": "text",
             "text": {
                 "preview_url": False,
-                "body": "🚀 Hola, ¿Cómo estás? Bienvenido."
+                "body": "🚀 Hola,"+mensaje
             }
     }
   #Convertir el diccionaria a formato JSON
@@ -100,6 +101,7 @@ def enviarNotifi(texto, telefono, nombreC, nombreR):
         connection.request("POST","/v19.0/346378921896150/messages", data, headers)
         response = connection.getresponse()
         print(response.status, response.reason)
+        messages.success(request, '¡Mensaje Enviado!')
         return redirect('/')
     except Exception as e:
         print(json.dumps(e))
