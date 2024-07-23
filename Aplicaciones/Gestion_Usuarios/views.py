@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import Usuario
 from django.contrib import messages
@@ -6,6 +7,7 @@ import request2
 import json
 import jsonify
 from datetime import datetime
+from .tasks import test_func0, mul,task_periodic
 # Create your views here.
 
 
@@ -93,7 +95,7 @@ def enviarNotifi(request,telefono, nombreC, mensaje):
 
     headers = {
         "Content-Type" : "application/json",
-        "Authorization" : "Bearer EAAOyRshDbC8BOZCUrC5usRMvAQflWRerrLz2pxYaREaO2udlYsa4tfMZBChlkl1W6ZAMEklnY50bDt40YSQYCWhZByr7x6JzCOsrILZBqw0Rw20DfpbIIphjXptXF1iUAWbRBpZBxZCZC7iel2VYXVvdIxbCcZA5IUJVn001xkAbGRSgpZBhYAVHTdvVFiGNeGXdZCQ"
+        "Authorization" : "Bearer EAAOyRshDbC8BOz2bvkJI922HNuXYGgEUtknT4Ajhog5AUAIHg1XzWZCp1ywehhKTPE1mW1upmF8cW0G7Oc8iuza0VPimg7ZCkZBRatCAQakFnscP99o2vH3BPDZCACZAhNIIsblajrlDXszb8jsXilmM25yupCCbZB6rjapXZClvYePtveFPdqI15LTf0ZCFSSU6"
     }
 
     connection = http.client.HTTPSConnection("graph.facebook.com")
@@ -121,6 +123,7 @@ def recibir_mensajes(req):
       #return jsonify({'message':'EVENT_RECEIVED'})
     except Exception as e:
       return jsonify({'message':'EVENT_RECEIVED'})
+
 
 
 
