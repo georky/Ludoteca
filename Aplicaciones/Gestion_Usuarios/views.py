@@ -25,7 +25,7 @@ def registrarUsuarios(request):
     mensaje =request.POST['txmensaje']
     #horaRegistro =['campo11']
     usuario = Usuario.objects.create(
-        telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH,mensaje=mensaje )
+        telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH,mensaje=mensaje, campo3='PENDIENTE' )
     messages.success(request, 'Niñ@ registrado!')
     return redirect('/')
 
