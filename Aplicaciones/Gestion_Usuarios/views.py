@@ -1,13 +1,15 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+import pytz
 from .models import Usuario
 from django.contrib import messages
 import http.client
 import request2
 import json
 import jsonify
-from datetime import datetime
+from datetime import datetime, timedelta
 from .tasks import test_func0, mul,task_periodic
+
 # Create your views here.
 
 
@@ -24,8 +26,13 @@ def registrarUsuarios(request):
     tiempoH = request.POST['numHoras']
     mensaje =request.POST['txmensaje']
     #horaRegistro =['campo11']
+    local_tz = pytz.timezone('America/Guayaquil')  # Cambia 'America/Guayaquil' por la zona horaria deseada
+    fecha_actual = datetime.now(local_tz).strftime('%Y-%m-%d %H:%M:%S')
+    fecha_termina =datetime.now(local_tz)
+    fecha_termina_hora = fecha_termina+timedelta(minutes=2)
+    fecha_termina_mas_una_hora_str =fecha_termina_hora.strftime('%Y-%m-%d %H:%M:%S')
     usuario = Usuario.objects.create(
-        telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH,mensaje=mensaje, campo3='PENDIENTE' )
+    telefono=telefono, nombreC=nombreC,nombreR=nombreR, tiempoH=tiempoH,mensaje=mensaje, campo3='PENDIENTE',campo5=fecha_termina_mas_una_hora_str, campo6=fecha_actual )
     messages.success(request, 'Niñ@ registrado!')
     return redirect('/')
 

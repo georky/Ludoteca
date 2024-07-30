@@ -1,5 +1,7 @@
+from datetime import datetime
 from django.db import models
-
+from django.utils import timezone
+import pytz
 # Creclass Curso(models.Model):
 class Usuario(models.Model):
     telefono = models.CharField(primary_key=True, max_length=15)
@@ -7,7 +9,7 @@ class Usuario(models.Model):
     nombreR = models.CharField(max_length=100)
     tiempoH = models.PositiveSmallIntegerField(null=False)
     mensaje = models.CharField(max_length=500,null=False)
-    campo11 = models.DateTimeField(null=True,auto_now_add=True)
+    campo11 = models.DateTimeField(null=True)
     campo12 = models.DurationField(null=True)
     campo13 = models.IntegerField(null=True)
     campo1 = models.IntegerField(null=True)
@@ -20,5 +22,6 @@ class Usuario(models.Model):
     def __str__(self):
         texto = "{0} ({1})"
         return texto.format(self.nombreC, self.tiempoH)
+    
 
         # return self.campo11.strftime("%Y-%m-%d %H:%M:%S")

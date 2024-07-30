@@ -9,8 +9,9 @@ import json
 import jsonify
 from django.contrib import messages
 from .models import Usuario
-
-
+from datetime import datetime, timezone,timedelta
+import pytz
+from django.utils import timezone
 @shared_task(bind=True)
 def test_func0(bind= True):
     for i in range(10):
@@ -40,51 +41,65 @@ def verificar_token(req):
         return jsonify({'error':'Token Invalido'}),401
 @shared_task(bind=True)
 def task_periodic(request,bind=True):
-    # Filtrar usuarios con campo3 igual a 'PENDIENTE'
-    usuariosListados = Usuario.objects.filter(campo3='PENDIENTE')
-    
-    # Iterar sobre los usuarios filtrados
-    for usuario in usuariosListados:
+
+   #local_tz = pytz.timezone('America/Guayaquil')  # Cambia 'America/Guayaquil' por la zona horaria deseada
+   fecha_actual = timezone.now()
+    # Filtra los usuarios con campo3 igual a 'PENDIENTE' y obtén los valores de campo5
+   usuarios_listados  = Usuario.objects.filter(campo3='PENDIENTE')
+   if not usuarios_listados.exists():
+        print("No hay usuarios pendientes. La tarea se detiene.")
+        return 
+    # Itera sobre las fechas obtenidas
+   for usuario in usuarios_listados:
+        fecha_termina = usuario.campo5
         telefono = usuario.telefono
         mensaje = usuario.mensaje
-        # Preparar el payload para enviar el mensaje a WhatsApp
-        data = {
-            "messaging_product": "whatsapp",
-            "recipient_type": "individual",
-            "to": '593'+telefono,
-            "type": "text",
-            "text": {
-                "preview_url": False,
-                "body": mensaje  # Aquí debes colocar el mensaje que deseas enviar
+        if isinstance(fecha_termina, str):
+            fecha_termina = datetime.strptime(fecha_termina, '%Y-%m-%d %H:%M:%S')
+        if timezone.is_naive(fecha_termina):
+            fecha_termina = timezone.make_aware(fecha_termina)
+        # Comparar fechas
+        if fecha_termina <= fecha_actual:
+            # Preparar el payload para enviar el mensaje a WhatsApp
+            data = {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": '593'+telefono,
+                "type": "text",
+                "text": {
+                    "preview_url": False,
+                    "body": mensaje
+                }
             }
-        }
-        
-        # Convertir el diccionario a formato JSON
-        data_json = json.dumps(data)
-        
-        # Configurar los headers para la solicitud HTTP
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer EAAOyRshDbC8BOz2bvkJI922HNuXYGgEUtknT4Ajhog5AUAIHg1XzWZCp1ywehhKTPE1mW1upmF8cW0G7Oc8iuza0VPimg7ZCkZBRatCAQakFnscP99o2vH3BPDZCACZAhNIIsblajrlDXszb8jsXilmM25yupCCbZB6rjapXZClvYePtveFPdqI15LTf0ZCFSSU6"
-        }
-        
-        # Realizar la conexión HTTPS con la API de WhatsApp de Facebook
-        try:
-            connection = http.client.HTTPSConnection("graph.facebook.com")
-            connection.request("POST", "/v19.0/346378921896150/messages", data_json, headers)
-            
-            response = connection.getresponse()
-            print(f"Mensaje enviado a {telefono}. Estado: {response.status}, Razón: {response.reason}")
-            
-            # Aquí puedes manejar la respuesta si es necesario
-            # Por ejemplo, verificar response.status para asegurarte de que el mensaje se haya enviado correctamente.
-            
-        except Exception as e:
-            print(f"Error al enviar mensaje a {telefono}: {str(e)}")
-            
-        finally:
-            connection.close()
-             
+
+            # Convertir el diccionario a formato JSON
+            data_json = json.dumps(data)
+
+            # Configurar los headers para la solicitud HTTP
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer EAAOyRshDbC8BOz2bvkJI922HNuXYGgEUtknT4Ajhog5AUAIHg1XzWZCp1ywehhKTPE1mW1upmF8cW0G7Oc8iuza0VPimg7ZCkZBRatCAQakFnscP99o2vH3BPDZCACZAhNIIsblajrlDXszb8jsXilmM25yupCCbZB6rjapXZClvYePtveFPdqI15LTf0ZCFSSU6"
+            }
+
+            # Realizar la conexión HTTPS con la API de WhatsApp de Facebook
+            try:
+                connection = http.client.HTTPSConnection("graph.facebook.com")
+                connection.request("POST", "/v19.0/346378921896150/messages", data_json, headers)
+                
+                response = connection.getresponse()
+                print(f"Mensaje enviado a {fecha_termina}. Estado: {response.status}, Razón: {response.reason}")
+                estado = 'COMPLETADO'
+                usuario.campo3 = estado
+                usuario.save()
+                # Aquí puedes manejar la respuesta si es necesario
+                # Por ejemplo, verificar response.status para asegurarte de que el mensaje se haya enviado correctamente.
+                
+            except Exception as e:
+                print(f"Error al enviar mensaje a {fecha_termina}: {str(e)}")
+                
+            finally:
+                connection.close()
+            #print(f"fecehhh {fecha_termina}: {str(e)}")
 def recibir_mensajes(req):
     try:
         req = request2.get_json()
