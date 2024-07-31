@@ -1,5 +1,3 @@
-
-
 from urllib import request
 from celery import shared_task
 import http.client
@@ -41,8 +39,6 @@ def verificar_token(req):
         return jsonify({'error':'Token Invalido'}),401
 @shared_task(bind=True)
 def task_periodic(request,bind=True):
-
-   #local_tz = pytz.timezone('America/Guayaquil')  # Cambia 'America/Guayaquil' por la zona horaria deseada
    fecha_actual = timezone.now()
     # Filtra los usuarios con campo3 igual a 'PENDIENTE' y obtén los valores de campo5
    usuarios_listados  = Usuario.objects.filter(campo3='PENDIENTE')
@@ -50,15 +46,18 @@ def task_periodic(request,bind=True):
         print("No hay usuarios pendientes. La tarea se detiene.")
         return 
     # Itera sobre las fechas obtenidas
+    
    for usuario in usuarios_listados:
         fecha_termina = usuario.campo5
         telefono = usuario.telefono
         mensaje = usuario.mensaje
         if isinstance(fecha_termina, str):
             fecha_termina = datetime.strptime(fecha_termina, '%Y-%m-%d %H:%M:%S')
+          
         if timezone.is_naive(fecha_termina):
             fecha_termina = timezone.make_aware(fecha_termina)
-        # Comparar fechas
+            
+
         if fecha_termina <= fecha_actual:
             # Preparar el payload para enviar el mensaje a WhatsApp
             data = {
@@ -87,7 +86,7 @@ def task_periodic(request,bind=True):
                 connection.request("POST", "/v19.0/346378921896150/messages", data_json, headers)
                 
                 response = connection.getresponse()
-                print(f"Mensaje enviado a {fecha_termina}. Estado: {response.status}, Razón: {response.reason}")
+                print(f"Mensaje enviado a {telefono}. Estado: {response.status}, Razón: {response.reason}")
                 estado = 'COMPLETADO'
                 usuario.campo3 = estado
                 usuario.save()
@@ -95,11 +94,11 @@ def task_periodic(request,bind=True):
                 # Por ejemplo, verificar response.status para asegurarte de que el mensaje se haya enviado correctamente.
                 
             except Exception as e:
-                print(f"Error al enviar mensaje a {fecha_termina}: {str(e)}")
+                print(f"Error al enviar mensaje a {telefono}: {str(e)}")
                 
             finally:
                 connection.close()
-            #print(f"fecehhh {fecha_termina}: {str(e)}")
+            
 def recibir_mensajes(req):
     try:
         req = request2.get_json()

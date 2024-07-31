@@ -126,7 +126,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #CELERY SETTINGS
 
-CELERY_BROKER_URL ='rediss://red-cqfb7qt6l47c73bbb7mg:02D17EAD1pF7ZSM8zizelavlmdsEyyck@oregon-redis.render.com:6379'
+CELERY_BROKER_URL ='redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
